@@ -23,16 +23,18 @@ describe "deprecations" do
     end
   end
 
-  describe RSpec::Core::ExampleGroup do
-    describe 'running_example' do
-      it 'is deprecated' do
-        RSpec.should_receive(:warn_deprecation)
-        self.running_example
-      end
+  %w[example running_example].each do |example_accessor|
+    describe RSpec::Core::ExampleGroup do
+      describe example_accessor do
+        it 'is deprecated' do
+          RSpec.should_receive(:warn_deprecation)
+          send(example_accessor)
+        end
 
-      it "delegates to example" do
-        RSpec.stub(:warn_deprecation)
-        running_example.should eq(example)
+        it "delegates to yielded example" do |ex|
+          RSpec.stub(:warn_deprecation)
+          send(example_accessor).should eq(ex)
+        end
       end
     end
   end

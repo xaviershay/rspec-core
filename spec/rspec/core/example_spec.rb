@@ -128,19 +128,19 @@ describe RSpec::Core::Example, :parent_metadata => 'sample' do
   end
 
   describe "accessing metadata within a running example" do
-    it "has a reference to itself when running" do
-      example.description.should eq("has a reference to itself when running")
+    it "has a reference to itself when running" do |ex|
+      ex.description.should eq("has a reference to itself when running")
     end
 
-    it "can access the example group's top level metadata as if it were its own" do
-      example.example_group.metadata.should include(:parent_metadata => 'sample')
-      example.metadata.should include(:parent_metadata => 'sample')
+    it "can access the example group's top level metadata as if it were its own" do |ex|
+      ex.example_group.metadata.should include(:parent_metadata => 'sample')
+      ex.metadata.should include(:parent_metadata => 'sample')
     end
   end
 
   describe "accessing options within a running example" do
-    it "can look up option values by key", :demo => :data do
-      example.metadata[:demo].should eq(:data)
+    it "can look up option values by key", :demo => :data do |ex|
+      ex.metadata[:demo].should eq(:data)
     end
   end
 
@@ -328,7 +328,7 @@ describe RSpec::Core::Example, :parent_metadata => 'sample' do
         blah.should be(:success)
       end
     end
-      
+
     context "in before(:each)" do
       it "sets each example to pending" do
         group = RSpec::Core::ExampleGroup.describe do
@@ -365,6 +365,12 @@ describe RSpec::Core::Example, :parent_metadata => 'sample' do
         group.examples.first.should be_pending
       end
     end
+  end
 
+  describe "optional block argument" do
+    it "contains the example" do |ex|
+      expect(ex).to be_an(RSpec::Core::Example)
+      expect(ex.description).to match(/contains the example/)
+    end
   end
 end

@@ -57,8 +57,8 @@ module RSpec::Core
         examples_run = []
         group = ExampleGroup.describe("parent") do
           describe("child") do
-            it "does something" do
-              examples_run << example
+            it "does something" do |ex|
+              examples_run << ex
             end
           end
         end
@@ -71,13 +71,13 @@ module RSpec::Core
         it "runs its children " do
           examples_run = []
           group = ExampleGroup.describe("parent") do
-            it "fails" do
-              examples_run << example
+            it "fails" do |ex|
+              examples_run << ex
               raise "fail"
             end
             describe("child") do
-              it "does something" do
-                examples_run << example
+              it "does something" do |ex|
+                examples_run << ex
               end
             end
           end
@@ -596,19 +596,19 @@ module RSpec::Core
         end
       end
 
-      it "has no 'running example' within before(:all)" do
+      it "yields no example to before(:all)" do
         group = ExampleGroup.describe
         running_example = :none
-        group.before(:all) { running_example = example }
+        group.before(:all) {|ex| running_example = ex}
         group.example("no-op") { }
         group.run
-        running_example.should be(nil)
+        running_example.should be_nil
       end
 
       it "has access to example options within before(:each)" do
         group = ExampleGroup.describe
         option = nil
-        group.before(:each) { option = example.options[:data] }
+        group.before(:each) {|ex| option = ex.options[:data] }
         group.example("no-op", :data => :sample) { }
         group.run
         option.should eq(:sample)
@@ -617,7 +617,7 @@ module RSpec::Core
       it "has access to example options within after(:each)" do
         group = ExampleGroup.describe
         option = nil
-        group.after(:each) { option = example.options[:data] }
+        group.after(:each) {|ex| option = ex.options[:data] }
         group.example("no-op", :data => :sample) { }
         group.run
         option.should eq(:sample)
@@ -626,7 +626,7 @@ module RSpec::Core
       it "has no 'running example' within after(:all)" do
         group = ExampleGroup.describe
         running_example = :none
-        group.after(:all) { running_example = example }
+        group.after(:all) {|ex| running_example = ex }
         group.example("no-op") { }
         group.run
         running_example.should be(nil)
@@ -688,20 +688,20 @@ module RSpec::Core
     describe Object, "describing nested example_groups", :little_less_nested => 'yep' do
 
       describe "A sample nested group", :nested_describe => "yep" do
-        it "sets the described class to the described class of the outer most group" do
-          example.example_group.described_class.should eq(ExampleGroup)
+        it "sets the described class to the described class of the outer most group" do |ex|
+          ex.example_group.described_class.should eq(ExampleGroup)
         end
 
-        it "sets the description to 'A sample nested describe'" do
-          example.example_group.description.should eq('A sample nested group')
+        it "sets the description to 'A sample nested describe'" do |ex|
+          ex.example_group.description.should eq('A sample nested group')
         end
 
-        it "has top level metadata from the example_group and its parent groups" do
-          example.example_group.metadata.should include(:little_less_nested => 'yep', :nested_describe => 'yep')
+        it "has top level metadata from the example_group and its parent groups" do |ex|
+          ex.example_group.metadata.should include(:little_less_nested => 'yep', :nested_describe => 'yep')
         end
 
-        it "exposes the parent metadata to the contained examples" do
-          example.metadata.should include(:little_less_nested => 'yep', :nested_describe => 'yep')
+        it "exposes the parent metadata to the contained examples" do |ex|
+          ex.metadata.should include(:little_less_nested => 'yep', :nested_describe => 'yep')
         end
       end
 
@@ -759,12 +759,12 @@ module RSpec::Core
         @before_all_top_level.should eq('before_all_top_level')
       end
 
-      it "can access the before all ivars in the before_all_ivars hash", :ruby => 1.8 do
-        example.example_group.before_all_ivars.should include('@before_all_top_level' => 'before_all_top_level')
+      it "can access the before all ivars in the before_all_ivars hash", :ruby => 1.8 do |ex|
+        ex.example_group.before_all_ivars.should include('@before_all_top_level' => 'before_all_top_level')
       end
 
-      it "can access the before all ivars in the before_all_ivars hash", :ruby => 1.9 do
-        example.example_group.before_all_ivars.should include(:@before_all_top_level => 'before_all_top_level')
+      it "can access the before all ivars in the before_all_ivars hash", :ruby => 1.9 do |ex|
+        ex.example_group.before_all_ivars.should include(:@before_all_top_level => 'before_all_top_level')
       end
 
       describe "but now I am nested" do

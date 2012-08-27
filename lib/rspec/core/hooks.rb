@@ -20,7 +20,19 @@ module RSpec
         include HookExtension
 
         def run(example)
-          example.instance_eval(&self)
+          example.instance_eval_with_args(example, &self)
+        end
+
+        def display_name
+          "before hook"
+        end
+      end
+
+      module BeforeAllExtension
+        include HookExtension
+
+        def run(example)
+          example.instance_eval_with_args(nil, &self)
         end
 
         def display_name
@@ -33,6 +45,18 @@ module RSpec
 
         def run(example)
           example.instance_eval_with_rescue("in an after hook", &self)
+        end
+
+        def display_name
+          "after hook"
+        end
+      end
+
+      module AfterAllExtension
+        include HookExtension
+
+        def run(example)
+          example.instance_eval_with_rescue(nil, &self)
         end
 
         def display_name
@@ -434,9 +458,9 @@ module RSpec
       SCOPES = [:each, :all, :suite]
 
       EXTENSIONS = {
-        :before => BeforeHookExtension,
-        :after  => AfterHookExtension,
-        :around => AroundHookExtension
+        :before => { :each => BeforeHookExtension, :all => BeforeAllExtension, :suite => BeforeHookExtension },
+        :after  => { :each => AfterHookExtension,  :all => AfterAllExtension,  :suite => AfterHookExtension },
+        :around => { :each => AroundHookExtension, :all => AroundHookExtension, :suite => AroundHookExtension }
       }
 
       def before_all_hooks_for(group)
@@ -457,7 +481,7 @@ module RSpec
 
       def register_hook prepend_or_append, hook, *args, &block
         scope, options = scope_and_options_from(*args)
-        hooks[hook][scope].send(prepend_or_append, block.extend(EXTENSIONS[hook]).with(options))
+        hooks[hook][scope].send(prepend_or_append, block.extend(EXTENSIONS[hook][scope]).with(options))
       end
 
       def find_hook(hook, scope, example_or_group, initial_procsy)

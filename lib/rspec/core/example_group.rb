@@ -54,6 +54,7 @@ module RSpec
         #   @param [String] name
         #   @param [Hash] extra_options
         #   @param [Block] implementation
+        #   @yield [Example] the example object
         def self.define_example_method(name, extra_options={})
           module_eval(<<-END_RUBY, __FILE__, __LINE__)
             def #{name}(desc=nil, *args, &block)
@@ -67,10 +68,22 @@ module RSpec
         end
 
         # Defines an example within a group.
+        # @example
+        #   example do
+        #   end
+        #
+        #   example "does something" do
+        #   end
+        #
+        #   example "does something", :with => 'addtional metadata' do
+        #   end
+        #
+        #   example "does something" do |ex|
+        #     # ex is a wrapper for the current running example
+        #   end
         define_example_method :example
         # Defines an example within a group.
-        #
-        # @see example
+        # @example
         define_example_method :it
         # Defines an example within a group.
         # This is here primarily for backward compatibility with early versions
@@ -79,17 +92,23 @@ module RSpec
         define_example_method :specify
 
         # Shortcut to define an example with `:focus` => true
+        # @see example
         define_example_method :focus,   :focused => true, :focus => true
         # Shortcut to define an example with `:focus` => true
+        # @see example
         define_example_method :focused, :focused => true, :focus => true
 
         # Shortcut to define an example with :pending => true
+        # @see example
         define_example_method :pending,  :pending => true
         # Shortcut to define an example with :pending => 'Temporarily disabled with xexample'
+        # @see example
         define_example_method :xexample, :pending => 'Temporarily disabled with xexample'
         # Shortcut to define an example with :pending => 'Temporarily disabled with xit'
+        # @see example
         define_example_method :xit,      :pending => 'Temporarily disabled with xit'
         # Shortcut to define an example with :pending => 'Temporarily disabled with xspecify'
+        # @see example
         define_example_method :xspecify, :pending => 'Temporarily disabled with xspecify'
 
         # Works like `alias_method :name, :example` with the added benefit of
@@ -426,19 +445,18 @@ An error occurred in an after(:all) hook.
         ivars.each {|name, value| instance.instance_variable_set(name, value)}
       end
 
-      # @attr_reader
-      # Returns the {Example} object that wraps this instance of
-      # `ExampleGroup`
+      # @deprecated use the first argument passed to the block instead
       def example
         RSpec.deprecate("example", "a block arg")
         @_current_rspec_example
       end
 
+      # @api private
       def example=(example)
         @_current_rspec_example = example
       end
 
-      # @deprecated use {ExampleGroup#example}
+      # @deprecated use the first argument passed to the block instead
       def running_example
         RSpec.deprecate("running_example", "a block arg")
         @_current_rspec_example

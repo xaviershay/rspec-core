@@ -78,6 +78,7 @@ module RSpec
             expected_backtraces = extract_backtrace_from(expected_doc)
             expected_doc.search("div.backtrace").remove
 
+            File.open(expected_file, "w") {|f| f.write generated_html }
             expect(actual_doc.inner_html).to eq(expected_doc.inner_html)
 
             expected_backtraces.each_with_index do |expected_line, i|

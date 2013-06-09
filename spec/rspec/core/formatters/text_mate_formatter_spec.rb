@@ -70,6 +70,7 @@ module RSpec
             expected_doc = Nokogiri::HTML(expected_html)
             expected_doc.search("div.backtrace").remove
 
+            File.open(expected_file, "w") {|f| f.write generated_html }
             expect(actual_doc.inner_html).to eq(expected_doc.inner_html)
 
             backtrace_lines.each do |backtrace_line|
